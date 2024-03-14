@@ -1,0 +1,53 @@
+{% extends "main_app/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+
+<div class="container ">
+    <div class="container">
+        <div class="my-2">
+          <a href="{% url 'addCenterForm' %}"" type="button" class="btn btn-success">Nouveau-centre</a>
+          <a href="{% url 'centres' %}" type="button" class="btn btn-success">Centres-list</a>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card mt-3">
+                <div class="card-body">
+            <form method=POST>
+                {% csrf_token %} 
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary mb-4">Ajouter</button>
+            </form> 
+            </div>
+            </div>
+        </div>
+        <div id="mapid" style="height: 600px;" class="col-md-6 my-4"></div><br>
+
+    </div>
+
+</div>
+{% block custom_js %}
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7iU-ErVpTKuucu5uUi59Nqp0w7WNO4eA&libraries=places&callback=initMap"></script>
+<script>
+    var mymap = new google.maps.Map(document.getElementById('mapid'), {
+        center: { lat: 20.2606, lng: -10.3631 },
+        zoom: 6
+    });
+
+    var marker = new google.maps.Marker({
+        position: { lat: 20.2606, lng: -10.3631 },
+        map: mymap,
+        draggable: true
+    });
+
+    marker.addListener('dragend', function(event) {
+        var position = marker.getPosition();
+        document.getElementById('lat').value = position.lat();
+        document.getElementById('lon').value = position.lng();
+    });
+</script>
+{% endblock custom_js %}
+
+
+{% endblock %}

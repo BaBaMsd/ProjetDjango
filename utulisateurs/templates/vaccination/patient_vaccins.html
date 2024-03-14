@@ -1,0 +1,55 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<div class="container w-full"> 
+  <div class="my-2">
+    <a href="{% url 'add_vaccination' %}" type="button" class="btn btn-success">Nouvelle</a>
+    <a href="{% url 'vaccins' %}" type="button" class="btn btn-success">Complementaire</a>
+    {% if request.user.role == 'responsable-center' %}
+    <a href="{% url 'vaccination_certificat' %}" type="button" class="btn btn-success">Certificat</a>
+    {% endif %}
+    </div>
+    <h3>Patient vaccination </h3>
+            <div class="card">
+                <div class="card-header">
+                  <center><h5>{{ patient.nom }} {{ patient.prenom }}</h5></center>
+                </div>
+                <div class="card-body">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th scope="col">N°</th>
+                        <th scope="col">Type-vaccination</th>
+                        <th scope="col">Vaccine</th>
+                        <th scope="col">Nombre dose</th>
+                       <th scope="col">Centre</th>
+                       <th scope="col"></th>
+                       
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in vaccins %}
+                      <tr>
+                 
+                       <td>{{ forloop.counter }}</td>
+                        <td>{{ i.vaccine.type}}</td>
+                        <td>{{ i.vaccine.nom }}</td>
+                        <td>{{ i.dose_administre}}/{{ i.dose_number }} </td>
+                        <td>{{ i.center.nom }}</td>
+                        {% if i.dose_number == i.dose_administre %}
+                        <td></td>
+                        {% else %}
+                        <td><a href="{% url 'vaccination_complementaire' i.id  %}" class="btn btn-primary">Vacciner</a></td>
+                        {% endif %}
+                      </tr>
+                    {% endfor %}
+                       
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+        </div>
+</div>
+</div>
+
+{% endblock %}

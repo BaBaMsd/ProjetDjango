@@ -1,0 +1,63 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+    <div class="container">
+      <div class="my-2">
+        <a href="{% url 'addCenterForm' %}"" type="button" class="btn btn-success">Nouveau-centre</a>
+        <a href="{% url 'centres' %}" type="button" class="btn btn-success">Centres-list</a>
+        </div>
+      <h2>Liste des Centres</h2>
+      <!-- <a href="{% url 'addCenterForm' %}" class="btn btn-primary my-1">Nouveau centre</a> -->
+      
+        <div class="row">
+          <div class="col-md-12">
+            <div id="mapid" style="height: 500px;"></div>
+            <!-- style="height: 400px;" -->
+          </div>
+          <!-- <div class="col-md-6">
+            <h2 class="text-center">Liste des centres de vaccination</h2>
+            <ul class="list-group">
+              {% for centre in centres %}
+                <li class="list-group-item">
+                  <h4>{{ centre.nom }}</h4>
+                  <p>{{ centre.moughataa.wilaya }}</p>
+                  <p>{{ centre.moughataa.nom }}</p>
+                </li>
+              {% empty %}
+                <li>Aucun centre de vaccination trouvé</li>
+              {% endfor %}
+            </ul>
+          </div> -->
+        </div>
+      </div>
+{% block custom_js %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7iU-ErVpTKuucu5uUi59Nqp0w7WNO4eA&libraries=places&callback=initMap"></script>
+<script>
+  function initMap() {
+    var mapOptions = {
+      zoom: 6,
+      center: {lat: 20.2606, lng: -10.3631}
+    };
+  
+    var map = new google.maps.Map(document.getElementById('mapid'), mapOptions);
+  
+    {% for centre in centres %}
+  var marker{{ forloop.counter }} = new google.maps.Marker({
+    position: {lat: {{ centre.latitude }}, lng: {{ centre.longitude }}},
+    map: map,
+    title: '{{ centre.nom }}'
+  });
+
+  var infowindow{{ forloop.counter }} = new google.maps.InfoWindow({
+    content: '<b>{{ centre.nom }}</b><br>{{ centre.moughataa.nom }}<br>{{ centre.moughataa.wilaya }}<br>'
+  });
+
+  marker{{ forloop.counter }}.addListener('click', function() {
+    infowindow{{ forloop.counter }}.open(map, marker{{ forloop.counter }});
+  });
+{% endfor %}
+  }
+  </script>
+      {% endblock custom_js %}
+    
+{% endblock %}

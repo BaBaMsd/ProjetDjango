@@ -1,0 +1,92 @@
+{% extends "main_app/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+ <div class="container">
+ <div class="py-3 px-3">
+    <div class="py-1">
+        <button id="print-button" onclick="window.print();" class="btn btn-primary print-hide">Imprimer</button>
+        <a id="print-button1" href="{% url 'vaccination_certificat' %}" class="btn btn-secondary print-hide">Annuler</a>
+
+    </div>
+ </div>
+ <div class="px-3">
+        <div class="card col-md-12">
+            <div class="card-body">
+                    <div class="">
+                        <center> <h5> {{ id_certificat.vaccin.type.nom }} شهادة التلقيح ضد</h5> </center>
+                       <center> <h5>Certificat de vaccination contre {{ id_certificat.vaccin.type.nom }}</h5> </center>
+                    </div>                    
+                    <hr>
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr style="font-size: 18px;">
+                                <td ><span style="text-decoration: underline;">Information Certificats</span><br />ID certificat:<br />Date du certificat:</td>
+                                <td><br />{{ id_certificat.id_certificat}}<br />{{ id_certificat.date_delivration|date:"d/m/Y"}}</td>
+                                <td style="text-align: right; font-size: 17px;"> <span style="text-decoration: underline;">معلومات الشهادة</span><br />رقم الشهادة<br />تاريخ الشهادة</td>
+                              </tr>
+                              <tr style="font-size: 18px;">
+                                <td ><span style="text-decoration: underline;">Personne vacciné</span><br />Nom: {{ id_certificat.patient.nom }} {{ id_certificat.patient.prenom }}<br />N.N.I:<br />Date de naissance</td>
+                                <td><br /><br />{{ id_certificat.patient.nni}}<br />{{ id_certificat.patient.dateNaissance|date:"d/m/Y"}}</td>
+                                <td style="text-align: right; font-size: 17px;"> <span style="text-decoration: underline;">الشخص المطعم</span><br />الإسم<br />ر.و.ت<br />تاريخ الميلاد</td>
+                              </tr>
+                              {% if Dose %}
+                              <tr style="font-size: 18px;">
+                                <td ><span style="text-decoration: underline;">Injections / Centre</span><br />
+      
+                                    {% for i in Dose %}
+                                    Dose : {{ i.vaccin.total_doses}}/{{ forloop.counter}}<br />
+                                    Vaccin : {{ i.vaccin.nom}}<br />
+                                    Centre : {{ i.vaccination.center.nom}}<br />
+                                    Date : {{ i.vaccination.date_darnier_dose|date:"d/m/Y"}}
+                                    <br />
+                                    <br />
+                                    {% endfor %}  
+                                    <img src="{{ id_certificat.qr_code.url}}" width="200" height="200">
+                                </td>
+
+                                <td></td>
+                                <td style="text-align: right; font-size: 17px;"> <span style="text-decoration: underline;">الجرعات \ المراكز</span><br />
+                                  {% for i in Dose %}
+                                  الجرعة<br />
+                                 التلقيح<br />
+                                  المركز<br />
+                                  التاريخ
+                                  <br />
+                                  <br />
+                                  {% endfor %}      
+                                </td>
+                              </tr>
+                              {% endif %}
+  
+                        </tbody>
+                      </table>
+                      
+                      <p><span style="font-size: 17px;"">إمسح الرمز للتحقق من المعلومات</span><br />Scanner ce QR code pour vérifier les information</p>
+
+                    
+            </div>
+        </div>
+        
+    </div>
+</div>
+</div> 
+{% block custom_js %}
+<script>
+window.addEventListener("beforeprint", function() {
+    document.getElementById("print-button").style.display = "none";
+  });
+  window.addEventListener("beforeprint", function() {
+    document.getElementById("print-button1").style.display = "none";
+  });
+  
+  window.addEventListener("afterprint", function() {
+    document.getElementById("print-button").style.display = "inline-block";
+  });
+  window.addEventListener("afterprint", function() {
+    document.getElementById("print-button1").style.display = "inline-block";
+  });
+</script>
+{% endblock custom_js %}
+ 
+ {% endblock %}

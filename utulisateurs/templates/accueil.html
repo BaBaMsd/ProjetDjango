@@ -1,0 +1,472 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<div class="container">
+  {% if centre %}
+    <center><h1>Statistiques de vaccination </h1></center>
+    <center><h2>{{ centre }} </h2></center>
+  {% else %}
+    <center><h1>Statistiques de vaccination </h1></center>
+  {% endif %}
+    <!-- <div class="col-md-6">
+      <select class="form-select form-control input-group col-6" onchange="location = this.value;">
+        <option selected>{{ type_v.nom}}</option>
+        {% for i in type_vs %}
+        <option value="{% url 'accueil' i.id %}"><a href="{% url 'accueil' i.id %}" class="nav-link">{{ i.nom }}</a></option>
+        {% endfor %}
+      </select>
+  </div>
+  <br> -->
+  <center> <h4 class="bg-white">La Nombre totale de Patient: {{ total_patient }}</h4></center>
+  
+    <!-- Graphique des vaccinations par état -->
+    <div class="row">
+      <div class="col-md-6 bg-white">
+        <h3>Vaccination par status des patient</h3>
+        <canvas id="etatChart"></canvas>
+        <br>
+        <ul class="collection">
+            {% for status, count in status_counts.items %}
+            <li class="collection-item">
+              {{ status }}: {{ count }}
+            </li>
+            {% endfor %}
+          </ul>
+      </div>
+  
+    <!-- Graphique des vaccinations par type de vaccin -->
+      <div class="col-md-6 bg-white">
+        <h3>Vaccination par type de vaccin</h3>
+        <canvas id="vaccineChart"></canvas>
+        <br>
+        <ul class="collection">
+            {% for vaccine, count in vaccine_counts.items %}
+            <li class="collection-item">
+              {{ vaccine }}: {{ count }}
+            </li>
+            {% endfor %}
+          </ul>
+      </div>
+    </div>
+    <br> 
+    <div class="row">
+    
+      <div class="col-sm-12 bg-white">
+        <center><h3>Vaccinations par Sexe</h3></center>
+       <div class="row">
+         <div class="col-sm-6">
+           <!-- Tableau des vaccinations par moughataa -->
+          
+           <table class="table table-bordered">
+             <thead>
+               <tr>
+                 <th>Sexe</th>
+                 <th>Nombre de vaccinations</th>
+               </tr>
+             </thead>
+             <tbody>
+               {% for sex, count in sex_counts.items %}
+               <tr>
+                 <td>{{ sex }}</td>
+                 <td>{{ count }}</td>
+               </tr>
+               {% endfor %}
+             </tbody>
+           </table>
+         </div>
+         <div class="col-md-6">
+           <div class="bg-white">
+               <canvas id="sex"></canvas>
+           </div>
+         </div>
+       </div>
+     </div>
+     <div class="col-sm-12 bg-white">
+      <center><h4>Vaccinations par tranche d'age</h4></center>
+      <hr>
+     <div class="row">
+       <div class="col-sm-6"> 
+         <table class="table table-bordered">
+           <thead>
+             <tr>
+               <th>Age</th>
+               <th>Nombre de vaccinations</th>
+             </tr>
+           </thead>
+           <tbody>
+             {% for age, count in age_counts.items %}
+             <tr>
+               <td>{{ age }}</td>
+               <td>{{ count }}</td>
+             </tr>
+             {% endfor %}
+           </tbody>
+         </table>
+       </div>
+       <div class="col-md-6">
+         <div class="bg-white">
+             <canvas id="age"></canvas>
+         </div>
+       </div>
+     </div>
+    </div>
+{% if request.user.is_superuser %}
+    <!-- Tableau des vaccinations par wilaya -->
+    
+      <div class="col-sm-12 bg-white">
+        <center><h3>Vaccinations par Wilaya</h3></center>
+         <div class="col-sm-12">
+           <!-- Tableau des vaccinations par moughataa -->
+          
+           <table class="table table-bordered">
+             <thead>
+               <tr>
+                 <th>Wilaya</th>
+                 <th>Nombre de vaccinations</th>
+               </tr>
+             </thead>
+             <tbody>
+               {% for wilaya, count in wilaya_counts.items %}
+               <tr>
+                 <td>{{ wilaya }}</td>
+                 <td>{{ count }}</td>
+               </tr>
+               {% endfor %}
+             </tbody>
+           </table>
+         </div>
+         <div class="col-md-6">
+  
+         </div>
+       </div>
+     </div>
+        <div class="col-sm-12">
+    <!-- Tableau des vaccinations par moughataa -->
+    <center><h3>Vaccinations par Moughataa</h3></center> 
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Moughataa</th>
+          <th>Nombre de vaccinations</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for centre, count in vaccinations_by_moughataa.items %}
+        <tr>
+          <td>{{ centre.nom }}</td>
+          <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+
+<div class="col-sm-12">
+    <center><h3>Vaccinations par Centre</h3></center>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Centre</th>
+          <th>Nombre de vaccinations</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for centre, count in centre_counts.items %}
+        <tr>
+          <td>{{ centre.nom}}</td>
+          <td>   {{ count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+{% endif %}
+</div>
+  </div>
+
+
+{% block custom_js %}
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+<script>
+    var etatData = {
+      labels: {{ status_labels|safe }},
+      datasets: [{
+        label: 'Vaccinations par état',
+        data: {{ status_values|safe }},
+        backgroundColor: [
+          '#3e95cd',
+          '#8e5ea2',
+          '#3cba9f',
+          '#e8c3b9',
+          '#c45850',
+          '#fcd2a8',
+          '#faebd7'
+        ],
+      }]
+    };
+
+  
+    var vaccineData = {
+      labels: {{ vaccine_labels|safe }},
+      datasets: [{
+        label: 'Vaccinations par type de vaccin',
+        data: {{ vaccine_values|safe }},
+        backgroundColor: [
+          '#3e95cd',
+          '#8e5ea2',
+          '#3cba9f',
+          '#e8c3b9',
+          '#c45850',
+          '#fcd2a8',
+          '#faebd7'
+        ],
+      }]
+    };
+
+    
+    var etatChart = new Chart(document.getElementById("etatChart"), {
+      type: 'pie',
+      data: etatData,
+    });
+  
+    var vaccineChart = new Chart(document.getElementById("vaccineChart"), {
+      type: 'pie',
+      data: vaccineData,
+    });
+
+    // var wilayaChart = new Chart(document.getElementById("wilayaCharte"), {
+    //   type: 'pie',
+    //   data: wilayaData,
+    // });
+
+const ctx = document.getElementById('sex').getContext('2d');
+var myChart1 = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [{% for sex, count in sex_counts.items %} '{{ sex }}', {% endfor %}],
+        datasets: [{
+            label: 'Diagramme de vaccination',
+            data: [{% for sex, count in sex_counts.items %} {{ count }}, {% endfor %}],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                    callback: function(value, index, values) {
+                        return value + '';
+                    }
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: ''
+                },
+                stacked: true
+            }],
+            xAxes: [{
+                stacked: true
+            }]
+        },
+        tooltips: {
+            callbacks: {
+                label: function(tooltipItem, data) {
+                    var dataset = data.datasets[tooltipItem.datasetIndex];
+                    var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                        return previousValue + currentValue;
+                    });
+                    var currentValue = dataset.data[tooltipItem.index];
+                    // var percentage = Math.floor(((currentValue/total) * 100));  
+                    var  percentage = 100;     
+                    return percentage ;
+                }
+            }
+        }
+    }
+});
+
+const ctx2 = document.getElementById('age').getContext('2d');
+var myChart1 = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels: [{% for age, count in age_counts.items %} '{{ age }}', {% endfor %}],
+        datasets: [{
+            label: 'Diagramme de vaccination',
+            data: [{% for age, count in age_counts.items %} {{ count }}, {% endfor %}],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true,
+                    callback: function(value, index, values) {
+                        return value + '';
+                    }
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: ''
+                },
+                stacked: true
+            }],
+            xAxes: [{
+                stacked: true
+            }]
+        },
+        tooltips: {
+            callbacks: {
+                label: function(tooltipItem, data) {
+                    var dataset = data.datasets[tooltipItem.datasetIndex];
+                    var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                        return previousValue + currentValue;
+                    });
+                    var currentValue = dataset.data[tooltipItem.index];
+                    // var percentage = Math.floor(((currentValue/total) * 100));  
+                    var  percentage = 100;     
+                    return percentage ;
+                }
+            }
+        }
+    }
+});
+// const ctxw = document.getElementById('wilaya').getContext('2d');
+// var myChart1 = new Chart(ctxw, {
+//     type: 'pie',
+//     data: {
+//         labels: [{% for wilaya, count in wilaya_counts.items %} '{{ wilaya }}', {% endfor %}],
+//         datasets: [{
+//             label: 'Diagramme de vaccination',
+//             data: [{% for wilaya, count in wilaya_counts.items %} {{ count }}, {% endfor %}],
+//             backgroundColor: [
+//                 '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
+//             borderColor: [
+//                 'rgba(255, 99, 132, 1)',
+//                 'rgba(54, 162, 235, 1)',
+//                 'rgba(255, 206, 86, 1)',
+//                 'rgba(75, 192, 192, 1)',
+//                 'rgba(153, 102, 255, 1)',
+//                 'rgba(255, 159, 64, 1)'
+//             ],
+//             borderWidth: 1
+//         }]
+//     },
+//     options: {
+//         scales: {
+//             yAxes: [{
+//                 ticks: {
+//                     beginAtZero: true,
+//                     callback: function(value, index, values) {
+//                         return value + '';
+//                     }
+//                 },
+//                 scaleLabel: {
+//                     display: true,
+//                     labelString: ''
+//                 },
+//                 stacked: true
+//             }],
+//             xAxes: [{
+//                 stacked: true
+//             }]
+//         },
+//         tooltips: {
+//             callbacks: {
+//                 label: function(tooltipItem, data) {
+//                     var dataset = data.datasets[tooltipItem.datasetIndex];
+//                     var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+//                         return previousValue + currentValue;
+//                     });
+//                     var currentValue = dataset.data[tooltipItem.index];
+//                     // var percentage = Math.floor(((currentValue/total) * 100));  
+//                     var  percentage = 100;     
+//                     return percentage ;
+//                 }
+//             }
+//         }
+//     }
+// });
+
+// const ctx = document.getElementById('sex').getContext('2d');
+// var myChart1 = new Chart(ctx, {
+//     type: 'bar',
+//     data: {
+//         labels: [{% for sex, count in sex_counts.items %} '{{ sex }}', {% endfor %}],
+//         datasets: [{
+//             label: 'Diagramme de vaccination',
+//             data: [{% for sex, count in sex_counts.items %} {{ count }}, {% endfor %}],
+//             backgroundColor: [
+//                 '#FF6384', '#36A2EB', '#FFCE56', '#2ecc71', '#e74c3c', '#3498db', '#9b59b6', '#34495e'],
+//             borderColor: [
+//                 'rgba(255, 99, 132, 1)',
+//                 'rgba(54, 162, 235, 1)',
+//                 'rgba(255, 206, 86, 1)',
+//                 'rgba(75, 192, 192, 1)',
+//                 'rgba(153, 102, 255, 1)',
+//                 'rgba(255, 159, 64, 1)'
+//             ],
+//             borderWidth: 1
+//         }]
+//     },
+//     options: {
+//         scales: {
+//             yAxes: [{
+//                 ticks: {
+//                     beginAtZero: true,
+//                     callback: function(value, index, values) {
+//                         return value + '';
+//                     }
+//                 },
+//                 scaleLabel: {
+//                     display: true,
+//                     labelString: ''
+//                 },
+//                 stacked: true
+//             }],
+//             xAxes: [{
+//                 stacked: true
+//             }]
+//         },
+//         tooltips: {
+//             callbacks: {
+//                 label: function(tooltipItem, data) {
+//                     var dataset = data.datasets[tooltipItem.datasetIndex];
+//                     var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+//                         return previousValue + currentValue;
+//                     });
+//                     var currentValue = dataset.data[tooltipItem.index];
+//                     // var percentage = Math.floor(((currentValue/total) * 100));  
+//                     var  percentage = 100;     
+//                     return percentage ;
+//                 }
+//             }
+//         }
+//     }
+// });
+  </script>
+{% endblock custom_js %}
+    
+{% endblock %}
